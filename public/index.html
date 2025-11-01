@@ -2,12 +2,11 @@
 <html lang="id" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>All In One Downloader</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --bg: #0d1117;
@@ -21,6 +20,7 @@
       background: var(--bg);
       color: var(--fg);
       font-family: 'Fira Code', monospace;
+      -webkit-text-size-adjust: 100%;
     }
     .scroll-el {
       transform: translateY(30px);
@@ -33,7 +33,7 @@
     }
     ::-webkit-scrollbar { display: none; }
 
-    /* Sidebar */
+    /* Sidebar v2 */
     #sidebar {
       position: fixed;
       top: 0;
@@ -45,9 +45,7 @@
       transition: right 0.3s ease;
       z-index: 50;
     }
-    #sidebar.open {
-      right: 0;
-    }
+    #sidebar.open { right: 0; }
     #sidebarOverlay {
       position: fixed;
       inset: 0;
@@ -55,85 +53,53 @@
       z-index: 40;
       display: none;
     }
-    #sidebarOverlay.show {
-      display: block;
-    }
+    #sidebarOverlay.show { display: block; }
   </style>
 </head>
 
-<body class="min-h-screen flex flex-col items-center px-4 relative">
-
-  <!-- Sidebar Toggle (Mobile) -->
-  <button id="sidebarToggle" class="fixed top-4 right-4 z-50 bg-[var(--card)] border border-[var(--border)] p-2 rounded-lg">
-    <i class="bi bi-list text-xl"></i>
-  </button>
-
-  <!-- Sidebar Overlay -->
-  <div id="sidebarOverlay" class="hidden"></div>
-
+<body class="min-h-screen flex flex-col items-center px-4">
   <!-- Sidebar -->
   <aside id="sidebar" class="p-6 text-sm">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-lg font-semibold">Menu</h2>
-      <button id="closeSidebar" class="text-gray-400 hover:text-white">
-        <i class="bi bi-x-lg"></i>
-      </button>
+      <button id="closeSidebar" class="text-gray-400 hover:text-white"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <!-- Contact Us -->
     <section class="mb-6">
-      <h3 class="font-semibold mb-2 flex items-center gap-2">
-        <i class="bi bi-envelope-fill text-[var(--accent)]"></i> Contact Us
-      </h3>
-      <p class="text-xs text-gray-400 mb-2">Butuh bantuan? Hubungi kami:</p>
-      <ul class="text-xs space-y-1">
+      <h3 class="font-semibold mb-2 flex items-center gap-2"><i class="bi bi-envelope-fill text-[var(--accent)]"></i> Contact Us</h3>
+      <ul class="text-xs space-y-1 text-gray-400">
         <li><strong>Email:</strong> yun-wangshu@proton.me</li>
-        <li><strong>Response:</strong> 24/7 jam</li>
+        <li>Response ≤ 24 jam</li>
       </ul>
     </section>
 
-    <!-- FAQs -->
     <section>
-      <h3 class="font-semibold mb-2 flex items-center gap-2">
-        <i class="bi bi-question-circle-fill text-[var(--accent)]"></i> FAQs
-      </h3>
-      <ul class="text-xs space-y-2">
-        <li>
-          <strong>Apakah aman?</strong><br>
-          <span class="text-gray-400">Ya, kami tidak menyimpan data Anda.</span>
-        </li>
-        <li>
-          <strong>Apakah gratis?</strong><br>
-          <span class="text-gray-400">100% gratis tanpa batasan.</span>
-        </li>
-        <li>
-          <strong>Format apa yang didukung?</strong><br>
-          <span class="text-gray-400">MP4, MOV, WEBM dari IG, TikTok, YouTube, Spotify, dll.</span>
-        </li>
+      <h3 class="font-semibold mb-2 flex items-center gap-2"><i class="bi bi-question-circle-fill text-[var(--accent)]"></i> FAQs</h3>
+      <ul class="text-xs space-y-2 text-gray-400">
+        <li><strong>Apakah aman?</strong><br>Tidak menyimpan data & tanpa redirect.</li>
+        <li><strong>Apakah gratis?</strong><br>100% gratis, tanpa batasan.</li>
+        <li><strong>Format video?</strong><br>MP4, MOV, WEBM langsung unduh.</li>
       </ul>
     </section>
   </aside>
+  <div id="sidebarOverlay" class="hidden"></div>
 
-  <!-- Konten Utama -->
+  <!-- Toggle sidebar -->
+  <button id="sidebarToggle" class="fixed top-4 right-4 z-50 bg-[var(--card)] border border-[var(--border)] p-2 rounded-lg">
+    <i class="bi bi-list text-xl"></i>
+  </button>
+
+  <!-- Hero -->
   <section class="w-full max-w-2xl py-20 text-center mt-10">
     <h1 class="text-3xl md:text-4xl font-semibold flex items-center justify-center gap-2">
-      <i class="bi bi-lightning-fill text-[var(--accent)]"></i>All In One Downloader 
+      <i class="bi bi-lightning-fill text-[var(--accent)]"></i> All In One Downloader
     </h1>
-
-    <!-- input -->
     <form id="form" class="mt-8">
       <label class="text-xs text-gray-500">// Paste HTTPS URL below</label>
-      <input
-        id="url"
-        type="url"
-        placeholder="https://instagram.com/..."
-        required
-        class="w-full mt-2 px-4 py-3 rounded-lg bg-[#010409] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-      />
-      <button
-        type="submit"
-        class="mt-4 w-full bg-[var(--accent)] text-black font-semibold py-3 rounded-lg hover:opacity-90 transition"
-      >
+      <input id="url" type="url" placeholder="https://instagram.com/..." required
+        class="w-full mt-2 px-4 py-3 rounded-lg bg-[#010409] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--accent)]" />
+      <button type="submit"
+        class="mt-4 w-full bg-[var(--accent)] text-black font-semibold py-3 rounded-lg hover:opacity-90 transition">
         Download Video →
       </button>
     </form>
@@ -147,7 +113,7 @@
     <h2 class="text-xl font-semibold">Mengapa Anda Memilih Website Kami?</h2>
   </section>
 
-  <!-- ELEMENT 1 – Cepat Kilat -->
+  <!-- Keunggulan -->
   <section class="scroll-el w-full max-w-2xl mb-6">
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
       <div class="flex items-center gap-3">
@@ -160,7 +126,6 @@
     </div>
   </section>
 
-  <!-- ELEMENT 2 – Aman & Andal -->
   <section class="scroll-el w-full max-w-2xl mb-6">
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
       <div class="flex items-center gap-3">
@@ -173,7 +138,6 @@
     </div>
   </section>
 
-  <!-- ELEMENT 3 – Dukungan 24/7 -->
   <section class="scroll-el w-full max-w-2xl mb-20">
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
       <div class="flex items-center gap-3">
@@ -192,30 +156,22 @@
   </footer>
 
   <script>
+    // sidebar
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     const toggleBtn = document.getElementById('sidebarToggle');
     const closeBtn = document.getElementById('closeSidebar');
 
-    function openSidebar() {
-      sidebar.classList.add('open');
-      overlay.classList.add('show');
-    }
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('show');
-    }
-
-    toggleBtn.addEventListener('click', openSidebar);
-    closeBtn.addEventListener('click', closeSidebar);
-    overlay.addEventListener('click', closeSidebar);
+    toggleBtn.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.remove('hidden'); });
+    closeBtn.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.add('hidden'); });
+    overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.add('hidden'); });
 
     // scroll-trigger
     const els = document.querySelectorAll('.scroll-el');
     const obs = new IntersectionObserver((es) => es.forEach(e => e.target.classList.toggle('show', e.isIntersecting)), { threshold: 0.3 });
     els.forEach(el => obs.observe(el));
 
-    // download
+    // download VIDEO – no redirect
     const form = document.getElementById('form');
     const urlInp = document.getElementById('url');
     const loading = document.getElementById('loading');
@@ -236,6 +192,7 @@
           body: JSON.stringify({ url })
         });
         if (!res.ok) throw new Error('Download failed');
+
         const blob = await res.blob();
         const name = 'video_' + (new URL(url).pathname.split('/').pop() || 'download');
         const a = document.createElement('a');
