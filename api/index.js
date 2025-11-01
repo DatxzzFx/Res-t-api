@@ -1,24 +1,24 @@
-const express = require('express');
-const axios   = require('axios');
-const crypto  = require('crypto');
+// api/index.js
+const axios = require('axios');
 
-const app = express();
-app.use(express.json({ limit: '10kb' }));
+const RAPID_KEY = '1dda0d29d3mshc5f2aacec619c44p16f219jsn99a62a516f98'; // ganti jika perlu
 
-const RL = new Map();
-const isRL = ip => {
-  const t = RL.get(ip) || 0;
-  const ok = Date.now() - t > 5000;
-  RL.set(ip, Date.now());
-  return !ok;
-};
+module.exports = async (req, res) => {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-app.post('*', async (req, res) => {
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.socket.remoteAddress;
-  if (isRL(ip)) return res.status(429).json({ error: 'Too fast' });
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Only POST allowed' });
+  }
 
   const { url } = req.body;
-  if (!url || !url.startsWith('https://')) return res.status(400).json({ error: 'Bad URL' });
+  if (!url || !url.startsWith('https://')) {
+    return res.status(400).json({ error: 'Valid HTTPS URL required' });
+  }
 
   try {
     const { data } = await axios.post(
@@ -26,35 +26,34 @@ app.post('*', async (req, res) => {
       { url },
       {
         headers: {
-          'content-type': 'application/json',
+          'accept-encoding': 'gzip',
+          'cache-control': 'no-cache',
+          'content-type': 'application/json; charset=utf-8',
+          referer: 'https://auto-download-all-in-one.p.rapidapi.com/',
+          'user-agent': 'Xihe/5.0',
           'x-rapidapi-host': 'auto-download-all-in-one.p.rapidapi.com',
-          'x-rapidapi-key': '1dda0d29d3mshc5f2aacec619c44p16f219jsn99a62a516f98'
-        },
-        timeout: 10000
+          'x-rapidapi-key': RAPID_KEY
+        }
       }
     );
 
-    const videos = (data.medias || []).filter(m =>
-      /mp4|mov|webm|mkv/i.test(m.extension) && m.url
-    );
-    if (!videos.length) return res.status(404).json({ error: 'Video not found' });
-
-    const best = videos.reduce((prev, curr) => {
-      const pH = parseInt(prev.quality) || prev.height || 0;
-      const cH = parseInt(curr.quality) || curr.height || 0;
-      return cH > pH ? curr : prev;
-    }, videos[0]);
-
-    const stream = await axios.get(best.url, { responseType: 'stream' });
-    const ext = best.extension || 'mp4';
-    const fileName = crypto.randomUUID() + '.' + ext;
-
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    stream.data.pipe(res);
-  } catch (e) {
-    res.status(500).json({ error: 'Server error' });
+    /* 
+    Contoh data yg sering dikembalikan:
+    {
+      "medias":[
+        {
+          "url": "https://video-arn2-2.xx.fbcdn.net/...",
+          "quality": "720 HD",
+          "extension": "mp4",
+          "size": 1234567
+        },
+        ...
+      ]
+    }
+    */
+    return res.json(data);
+  } catch (err) {
+    const msg = err.response?.data?.message || err.message || 'Unknown error';
+    return res.status(500).json({ error: msg });
   }
-});
-
-module.exports = app;
+};
