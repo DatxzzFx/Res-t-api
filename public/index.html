@@ -22,6 +22,7 @@
       font-family: 'Fira Code', monospace;
       -webkit-text-size-adjust: 100%;
     }
+    ::-webkit-scrollbar { display: none; }
     .scroll-el {
       transform: translateY(30px);
       opacity: 0;
@@ -31,8 +32,6 @@
       transform: translateY(0);
       opacity: 1;
     }
-    ::-webkit-scrollbar { display: none; }
-
     #sidebar {
       position: fixed;
       top: 0;
@@ -105,9 +104,6 @@
 
     <div id="loading" class="hidden mt-4 text-xs text-gray-400">// Downloading video...</div>
     <div id="error" class="hidden mt-4 text-xs text-[var(--error)]"></div>
-
-    <!-- Container hasil / kualitas -->
-    <div id="result" class="hidden mt-6 w-full text-left text-sm"></div>
   </section>
 
   <!-- Slogan -->
@@ -158,8 +154,9 @@
   </footer>
 
   <script>
-    // Sidebar
     const $ = s => document.querySelector(s);
+
+    // Sidebar
     $('#sidebarToggle').onclick = () => { $('#sidebar').classList.add('open'); $('#sidebarOverlay').classList.add('show'); };
     $('#closeSidebar').onclick = $('#sidebarOverlay').onclick = () => { $('#sidebar').classList.remove('open'); $('#sidebarOverlay').classList.remove('show'); };
 
@@ -172,8 +169,6 @@
       e.preventDefault();
       $('#loading').classList.remove('hidden');
       $('#error').classList.add('hidden');
-      $('#result').classList.add('hidden');
-      $('#result').innerHTML = '';
 
       const url = $('#url').value.trim();
       try {
@@ -184,7 +179,14 @@
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Server error');
-        renderResult(json);
+
+        // Langsung download
+        const a = document.createElement('a');
+        a.href = json.downloadUrl;
+        a.download = json.filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
       } catch (err) {
         $('#error').textContent = err.message;
         $('#error').classList.remove('hidden');
@@ -192,28 +194,6 @@
         $('#loading').classList.add('hidden');
       }
     });
-
-    function renderResult(data) {
-      const arr = data.medias || [data]; // fallback jika tidak ada array
-      const html = arr.map((m, i) => `
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 mb-3 flex items-center justify-between">
-          <div>
-            <div class="font-semibold">${m.quality || 'Default'}</div>
-            <div class="text-xs text-gray-400">${m.extension?.toUpperCase() || 'MP4'} ${m.size ? `• ${formatBytes(m.size)}` : ''}</div>
-          </div>
-          <a href="${m.url}" download class="bg-[var(--accent)] text-black px-3 py-2 rounded-md text-sm font-semibold hover:opacity-90">
-            Download
-          </a>
-        </div>
-      `).join('');
-      $('#result').innerHTML = html;
-      $('#result').classList.remove('hidden');
-    }
-
-    function formatBytes(b) {
-      const kb = b / 1024;
-      return kb < 1024 ? `${kb.toFixed(1)} KB` : `${(kb / 1024).toFixed(1)} MB`;
-    }
   </script>
 </body>
 </html>
