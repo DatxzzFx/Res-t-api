@@ -33,7 +33,6 @@
     }
     ::-webkit-scrollbar { display: none; }
 
-    /* Sidebar v2 */
     #sidebar {
       position: fixed;
       top: 0;
@@ -106,6 +105,9 @@
 
     <div id="loading" class="hidden mt-4 text-xs text-gray-400">// Downloading video...</div>
     <div id="error" class="hidden mt-4 text-xs text-[var(--error)]"></div>
+
+    <!-- Container hasil / kualitas -->
+    <div id="result" class="hidden mt-6 w-full text-left text-sm"></div>
   </section>
 
   <!-- Slogan -->
@@ -156,56 +158,62 @@
   </footer>
 
   <script>
-    // sidebar
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const toggleBtn = document.getElementById('sidebarToggle');
-    const closeBtn = document.getElementById('closeSidebar');
+    // Sidebar
+    const $ = s => document.querySelector(s);
+    $('#sidebarToggle').onclick = () => { $('#sidebar').classList.add('open'); $('#sidebarOverlay').classList.add('show'); };
+    $('#closeSidebar').onclick = $('#sidebarOverlay').onclick = () => { $('#sidebar').classList.remove('open'); $('#sidebarOverlay').classList.remove('show'); };
 
-    toggleBtn.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.remove('hidden'); });
-    closeBtn.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.add('hidden'); });
-    overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.add('hidden'); });
+    // Scroll animation
+    const io = new IntersectionObserver((entries) => entries.forEach(e => e.target.classList.toggle('show', e.isIntersecting)), { threshold: 0.2 });
+    document.querySelectorAll('.scroll-el').forEach(el => io.observe(el));
 
-    // scroll-trigger
-    const els = document.querySelectorAll('.scroll-el');
-    const obs = new IntersectionObserver((es) => es.forEach(e => e.target.classList.toggle('show', e.isIntersecting)), { threshold: 0.3 });
-    els.forEach(el => obs.observe(el));
-
-    // download VIDEO – no redirect
-    const form = document.getElementById('form');
-    const urlInp = document.getElementById('url');
-    const loading = document.getElementById('loading');
-    const error = document.getElementById('error');
-
-    form.addEventListener('submit', async (e) => {
+    // Downloader
+    $('#form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const url = urlInp.value.trim();
-      if (!url) return;
+      $('#loading').classList.remove('hidden');
+      $('#error').classList.add('hidden');
+      $('#result').classList.add('hidden');
+      $('#result').innerHTML = '';
 
-      loading.classList.remove('hidden');
-      error.classList.add('hidden');
-
+      const url = $('#url').value.trim();
       try {
-        const res = await fetch('/api/index.js', {
+        const res = await fetch('/api', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url })
         });
-        if (!res.ok) throw new Error('Download failed');
-
-        const blob = await res.blob();
-        const name = 'video_' + (new URL(url).pathname.split('/').pop() || 'download');
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = name + '.mp4';
-        a.click();
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Server error');
+        renderResult(json);
       } catch (err) {
-        error.textContent = '// ' + err.message;
-        error.classList.remove('hidden');
+        $('#error').textContent = err.message;
+        $('#error').classList.remove('hidden');
       } finally {
-        loading.classList.add('hidden');
+        $('#loading').classList.add('hidden');
       }
     });
+
+    function renderResult(data) {
+      const arr = data.medias || [data]; // fallback jika tidak ada array
+      const html = arr.map((m, i) => `
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 mb-3 flex items-center justify-between">
+          <div>
+            <div class="font-semibold">${m.quality || 'Default'}</div>
+            <div class="text-xs text-gray-400">${m.extension?.toUpperCase() || 'MP4'} ${m.size ? `• ${formatBytes(m.size)}` : ''}</div>
+          </div>
+          <a href="${m.url}" download class="bg-[var(--accent)] text-black px-3 py-2 rounded-md text-sm font-semibold hover:opacity-90">
+            Download
+          </a>
+        </div>
+      `).join('');
+      $('#result').innerHTML = html;
+      $('#result').classList.remove('hidden');
+    }
+
+    function formatBytes(b) {
+      const kb = b / 1024;
+      return kb < 1024 ? `${kb.toFixed(1)} KB` : `${(kb / 1024).toFixed(1)} MB`;
+    }
   </script>
 </body>
 </html>
