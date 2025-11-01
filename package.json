@@ -1,9 +1,12 @@
 {
-  "functions": {
-    "api/index.js": { "runtime": "nodejs18.x" }
+  "name": "aio-downloader",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step'"
   },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/(.*)", "dest": "/public/$1" }
-  ]
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
 }
