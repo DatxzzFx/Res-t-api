@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AIO Downloader</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['Ubuntu Mono', 'monospace'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --background: #f9fbff;
+      --foreground: #2c3e50;
+      --card: #ffffff;
+      --card-foreground: #2c3e50;
+      --primary: #3498db;
+      --primary-foreground: #ffffff;
+      --secondary: #85c1e9;
+      --accent: #48d1cc;
+      --muted: #f1f5f9;
+      --muted-foreground: #7f8c8d;
+      --border: rgba(0, 0, 0, 0.08);
+      --radius: 0.5rem;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.12);
+      --gradient-primary: linear-gradient(135deg, #3498db 0%, #85c1e9 100%);
+      --gradient-secondary: linear-gradient(135deg, #85c1e9 0%, #48d1cc 100%);
+    }
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: 'Inter', sans-serif;
+    }
+    ::-webkit-scrollbar { display: none !important; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center px-4">
+  <div class="w-full max-w-2xl">
+    <header class="text-center mb-6">
+      <h1 class="text-3xl md:text-4xl font-bold flex items-center justify-center gap-2">
+        <span class="material-icons text-[var(--primary)]">cloud_download</span>
+        AIO Downloader
+      </h1>
+      <p class="text-sm text-[var(--muted-foreground)] mt-1">Instagram, TikTok, YouTube, Spotify & more</p>
+    </header>
+
+    <div class="bg-[var(--card)] rounded-[var(--radius)] shadow-[var(--shadow)] p-6">
+      <form id="form" class="flex flex-col gap-4">
+        <input
+          id="url"
+          type="url"
+          placeholder="Paste your link here..."
+          required
+          class="w-full px-4 py-3 rounded-lg bg-[var(--muted)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+        />
+        <button
+          type="submit"
+          class="w-full bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold py-3 rounded-lg hover:opacity-90 transition"
+        >
+          Download
+        </button>
+      </form>
+
+      <div id="loading" class="hidden mt-4 text-center text-sm text-[var(--muted-foreground)]">Processing...</div>
+
+      <div id="result" class="hidden mt-6">
+        <h2 class="font-semibold mb-2">Download Links:</h2>
+        <div id="links" class="space-y-2"></div>
+      </div>
+
+      <div id="error" class="hidden mt-4 text-sm text-red-600"></div>
+    </div>
+
+    <footer class="text-center text-xs text-[var(--muted-foreground)] mt-6">
+      <a href="/tos.html" class="underline">Terms of Service</a> •
+      <a href="/privacy.html" class="underline">Privacy Policy</a>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const urlInp = document.getElementById('url');
+    const result = document.getElementById('result');
+    const links = document.getElementById('links');
+    const error = document.getElementById('error');
+    const loading = document.getElementById('loading');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = urlInp.value.trim();
+      if (!url) return;
+
+      result.classList.add('hidden');
+      error.classList.add('hidden');
+      links.innerHTML = '';
+      loading.classList.remove('hidden');
+
+      try {
+        const res = await fetch('/api/index.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Unknown error');
+
+        loading.classList.add('hidden');
+
+        if (data.medias && data.medias.length) {
+          result.classList.remove('hidden');
+          data.medias.forEach(m => {
+            const a = document.createElement('a');
+            a.href = m.url;
+            a.textContent = `${m.quality || 'HD'} - ${m.extension || 'mp4'}`;
+            a.target = '_blank';
+            a.className = 'block underline text-[var(--primary)] hover:text-[var(--accent)]';
+            links.appendChild(a);
+          });
+        } else {
+          throw new Error('No media found.');
+        }
+      } catch (err) {
+        loading.classList.add('hidden');
+        error.textContent = err.message;
+        error.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
