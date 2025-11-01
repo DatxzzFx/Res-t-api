@@ -34,11 +34,19 @@ app.post('*', async (req, res) => {
       }
     );
 
-    const vid = (data.medias || []).find(m => /mp4|mov|webm/i.test(m.extension)) || data.medias?.[0];
-    if (!vid?.url) return res.status(404).json({ error: 'Video not found' });
+    const videos = (data.medias || []).filter(m =>
+      /mp4|mov|webm|mkv/i.test(m.extension) && m.url
+    );
+    if (!videos.length) return res.status(404).json({ error: 'Video not found' });
 
-    const stream = await axios.get(vid.url, { responseType: 'stream' });
-    const ext = vid.extension || 'mp4';
+    const best = videos.reduce((prev, curr) => {
+      const pH = parseInt(prev.quality) || prev.height || 0;
+      const cH = parseInt(curr.quality) || curr.height || 0;
+      return cH > pH ? curr : prev;
+    }, videos[0]);
+
+    const stream = await axios.get(best.url, { responseType: 'stream' });
+    const ext = best.extension || 'mp4';
     const fileName = crypto.randomUUID() + '.' + ext;
 
     res.setHeader('Content-Type', 'application/octet-stream');
