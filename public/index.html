@@ -1,113 +1,233 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AIO Downloader</title>
+  <title>All In One Downloader</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            mono: ['Ubuntu Mono', 'monospace'],
-            sans: ['Inter', 'system-ui', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --background: #f9fbff;
-      --foreground: #2c3e50;
-      --card: #ffffff;
-      --card-foreground: #2c3e50;
-      --primary: #3498db;
-      --primary-foreground: #ffffff;
-      --secondary: #85c1e9;
-      --accent: #48d1cc;
-      --muted: #f1f5f9;
-      --muted-foreground: #7f8c8d;
-      --border: rgba(0, 0, 0, 0.08);
-      --radius: 0.5rem;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.12);
-      --gradient-primary: linear-gradient(135deg, #3498db 0%, #85c1e9 100%);
-      --gradient-secondary: linear-gradient(135deg, #85c1e9 0%, #48d1cc 100%);
+      --bg: #0d1117;
+      --fg: #c9d1d9;
+      --card: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --error: #f85149;
     }
     body {
-      background-color: var(--background);
-      color: var(--foreground);
-      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Fira Code', monospace;
     }
-    ::-webkit-scrollbar { display: none !important; }
+    .scroll-el {
+      transform: translateY(30px);
+      opacity: 0;
+      transition: all .6s ease;
+    }
+    .scroll-el.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    /* Sidebar */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 280px;
+      height: 100%;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      transition: right 0.3s ease;
+      z-index: 50;
+    }
+    #sidebar.open {
+      right: 0;
+    }
+    #sidebarOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 40;
+      display: none;
+    }
+    #sidebarOverlay.show {
+      display: block;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center px-4">
-  <div class="w-full max-w-2xl">
-    <header class="text-center mb-6">
-      <h1 class="text-3xl md:text-4xl font-bold flex items-center justify-center gap-2">
-        <span class="material-icons text-[var(--primary)]">cloud_download</span>
-        AIO Downloader
-      </h1>
-      <p class="text-sm text-[var(--muted-foreground)] mt-1">Instagram, TikTok, YouTube, Spotify & more</p>
-    </header>
 
-    <div class="bg-[var(--card)] rounded-[var(--radius)] shadow-[var(--shadow)] p-6">
-      <form id="form" class="flex flex-col gap-4">
-        <input
-          id="url"
-          type="url"
-          placeholder="Paste your link here..."
-          required
-          class="w-full px-4 py-3 rounded-lg bg-[var(--muted)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-        />
-        <button
-          type="submit"
-          class="w-full bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold py-3 rounded-lg hover:opacity-90 transition"
-        >
-          Download
-        </button>
-      </form>
+<body class="min-h-screen flex flex-col items-center px-4 relative">
 
-      <div id="loading" class="hidden mt-4 text-center text-sm text-[var(--muted-foreground)]">Processing...</div>
+  <!-- Sidebar Toggle (Mobile) -->
+  <button id="sidebarToggle" class="fixed top-4 right-4 z-50 bg-[var(--card)] border border-[var(--border)] p-2 rounded-lg">
+    <i class="bi bi-list text-xl"></i>
+  </button>
 
-      <div id="result" class="hidden mt-6">
-        <h2 class="font-semibold mb-2">Download Links:</h2>
-        <div id="links" class="space-y-2"></div>
-      </div>
+  <!-- Sidebar Overlay -->
+  <div id="sidebarOverlay" class="hidden"></div>
 
-      <div id="error" class="hidden mt-4 text-sm text-red-600"></div>
+  <!-- Sidebar -->
+  <aside id="sidebar" class="p-6 text-sm">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-lg font-semibold">Menu</h2>
+      <button id="closeSidebar" class="text-gray-400 hover:text-white">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </div>
 
-    <footer class="text-center text-xs text-[var(--muted-foreground)] mt-6">
-      <a href="/tos.html" class="underline">Terms of Service</a> •
-      <a href="/privacy.html" class="underline">Privacy Policy</a>
-    </footer>
-  </div>
+    <!-- Contact Us -->
+    <section class="mb-6">
+      <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <i class="bi bi-envelope-fill text-[var(--accent)]"></i> Contact Us
+      </h3>
+      <p class="text-xs text-gray-400 mb-2">Butuh bantuan? Hubungi kami:</p>
+      <ul class="text-xs space-y-1">
+        <li><strong>Email:</strong> yun-wangshu@proton.me</li>
+        <li><strong>Response:</strong> 24/7 jam</li>
+      </ul>
+    </section>
+
+    <!-- FAQs -->
+    <section>
+      <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <i class="bi bi-question-circle-fill text-[var(--accent)]"></i> FAQs
+      </h3>
+      <ul class="text-xs space-y-2">
+        <li>
+          <strong>Apakah aman?</strong><br>
+          <span class="text-gray-400">Ya, kami tidak menyimpan data Anda.</span>
+        </li>
+        <li>
+          <strong>Apakah gratis?</strong><br>
+          <span class="text-gray-400">100% gratis tanpa batasan.</span>
+        </li>
+        <li>
+          <strong>Format apa yang didukung?</strong><br>
+          <span class="text-gray-400">MP4, MOV, WEBM dari IG, TikTok, YouTube, Spotify, dll.</span>
+        </li>
+      </ul>
+    </section>
+  </aside>
+
+  <!-- Konten Utama -->
+  <section class="w-full max-w-2xl py-20 text-center mt-10">
+    <h1 class="text-3xl md:text-4xl font-semibold flex items-center justify-center gap-2">
+      <i class="bi bi-lightning-fill text-[var(--accent)]"></i>All In One Downloader 
+    </h1>
+
+    <!-- input -->
+    <form id="form" class="mt-8">
+      <label class="text-xs text-gray-500">// Paste HTTPS URL below</label>
+      <input
+        id="url"
+        type="url"
+        placeholder="https://instagram.com/..."
+        required
+        class="w-full mt-2 px-4 py-3 rounded-lg bg-[#010409] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+      />
+      <button
+        type="submit"
+        class="mt-4 w-full bg-[var(--accent)] text-black font-semibold py-3 rounded-lg hover:opacity-90 transition"
+      >
+        Download Video →
+      </button>
+    </form>
+
+    <div id="loading" class="hidden mt-4 text-xs text-gray-400">// Downloading video...</div>
+    <div id="error" class="hidden mt-4 text-xs text-[var(--error)]"></div>
+  </section>
+
+  <!-- Slogan -->
+  <section class="scroll-el w-full max-w-2xl mb-8 text-center">
+    <h2 class="text-xl font-semibold">Mengapa Anda Memilih Website Kami?</h2>
+  </section>
+
+  <!-- ELEMENT 1 – Cepat Kilat -->
+  <section class="scroll-el w-full max-w-2xl mb-6">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
+      <div class="flex items-center gap-3">
+        <i class="bi bi-lightning-fill text-yellow-400 text-xl"></i>
+        <div>
+          <h3 class="font-semibold">Cepat Kilat</h3>
+          <p class="text-xs text-gray-400">Dioptimalkan dengan latensi minimal untuk aplikasi waktu nyata.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ELEMENT 2 – Aman & Andal -->
+  <section class="scroll-el w-full max-w-2xl mb-6">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
+      <div class="flex items-center gap-3">
+        <i class="bi bi-shield-check text-blue-400 text-xl"></i>
+        <div>
+          <h3 class="font-semibold">Aman & Andal</h3>
+          <p class="text-xs text-gray-400">Keamanan tingkat perusahaan dengan jaminan uptime 99,9%.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ELEMENT 3 – Dukungan 24/7 -->
+  <section class="scroll-el w-full max-w-2xl mb-20">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
+      <div class="flex items-center gap-3">
+        <i class="bi bi-clock text-purple-400 text-xl"></i>
+        <div>
+          <h3 class="font-semibold">Dukungan 24/7</h3>
+          <p class="text-xs text-gray-400">Dukungan 24 jam untuk semua kebutuhan integrasi Anda.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center text-xs text-gray-500 pb-10">
+    <a href="/tos.html" class="underline">Terms</a> •
+    <a href="/privacy.html" class="underline">Privacy</a>
+  </footer>
 
   <script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const closeBtn = document.getElementById('closeSidebar');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    }
+
+    toggleBtn.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    // scroll-trigger
+    const els = document.querySelectorAll('.scroll-el');
+    const obs = new IntersectionObserver((es) => es.forEach(e => e.target.classList.toggle('show', e.isIntersecting)), { threshold: 0.3 });
+    els.forEach(el => obs.observe(el));
+
+    // download
     const form = document.getElementById('form');
     const urlInp = document.getElementById('url');
-    const result = document.getElementById('result');
-    const links = document.getElementById('links');
-    const error = document.getElementById('error');
     const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const url = urlInp.value.trim();
       if (!url) return;
 
-      result.classList.add('hidden');
-      error.classList.add('hidden');
-      links.innerHTML = '';
       loading.classList.remove('hidden');
+      error.classList.add('hidden');
 
       try {
         const res = await fetch('/api/index.js', {
@@ -115,29 +235,18 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url })
         });
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.error || 'Unknown error');
-
-        loading.classList.add('hidden');
-
-        if (data.medias && data.medias.length) {
-          result.classList.remove('hidden');
-          data.medias.forEach(m => {
-            const a = document.createElement('a');
-            a.href = m.url;
-            a.textContent = `${m.quality || 'HD'} - ${m.extension || 'mp4'}`;
-            a.target = '_blank';
-            a.className = 'block underline text-[var(--primary)] hover:text-[var(--accent)]';
-            links.appendChild(a);
-          });
-        } else {
-          throw new Error('No media found.');
-        }
+        if (!res.ok) throw new Error('Download failed');
+        const blob = await res.blob();
+        const name = 'video_' + (new URL(url).pathname.split('/').pop() || 'download');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name + '.mp4';
+        a.click();
       } catch (err) {
-        loading.classList.add('hidden');
-        error.textContent = err.message;
+        error.textContent = '// ' + err.message;
         error.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
       }
     });
   </script>
