@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>All In One Downloader</title>
+  <title>All In One Downloader - Download Video Social Media</title>
+  <meta name="description" content="Download video dari Instagram, TikTok, YouTube, Twitter dan platform sosial media lainnya dengan mudah dan cepat">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -14,24 +15,40 @@
       --card: #161b22;
       --border: #30363d;
       --accent: #58a6ff;
+      --success: #3fb950;
       --error: #f85149;
+      --warning: #d29922;
     }
+    
     body {
       background: var(--bg);
       color: var(--fg);
       font-family: 'Fira Code', monospace;
       -webkit-text-size-adjust: 100%;
+      overflow-x: hidden;
     }
-    ::-webkit-scrollbar { display: none; }
+    
+    ::-webkit-scrollbar { 
+      width: 6px;
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    
     .scroll-el {
       transform: translateY(30px);
       opacity: 0;
-      transition: all .6s ease;
+      transition: all 0.6s ease;
     }
+    
     .scroll-el.show {
       transform: translateY(0);
       opacity: 1;
     }
+    
     #sidebar {
       position: fixed;
       top: 0;
@@ -42,8 +59,13 @@
       border-left: 1px solid var(--border);
       transition: right 0.3s ease;
       z-index: 50;
+      overflow-y: auto;
     }
-    #sidebar.open { right: 0; }
+    
+    #sidebar.open { 
+      right: 0; 
+    }
+    
     #sidebarOverlay {
       position: fixed;
       inset: 0;
@@ -51,148 +73,404 @@
       z-index: 40;
       display: none;
     }
-    #sidebarOverlay.show { display: block; }
+    
+    #sidebarOverlay.show { 
+      display: block; 
+    }
+    
+    .loading-spinner {
+      border: 2px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .pulse-glow {
+      animation: pulse-glow 2s infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(88, 166, 255, 0.4); }
+      50% { box-shadow: 0 0 20px rgba(88, 166, 255, 0.8); }
+    }
+    
+    .platform-icon {
+      transition: transform 0.3s ease;
+    }
+    
+    .platform-icon:hover {
+      transform: scale(1.1);
+    }
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col items-center px-4">
-  <!-- Sidebar -->
+  <!-- Sidebar Menu -->
   <aside id="sidebar" class="p-6 text-sm">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-lg font-semibold">Menu</h2>
-      <button id="closeSidebar" class="text-gray-400 hover:text-white"><i class="bi bi-x-lg"></i></button>
+      <button id="closeSidebar" class="text-gray-400 hover:text-white transition-colors">
+        <i class="bi bi-x-lg text-xl"></i>
+      </button>
     </div>
 
     <section class="mb-6">
-      <h3 class="font-semibold mb-2 flex items-center gap-2"><i class="bi bi-envelope-fill text-[var(--accent)]"></i> Contact Us</h3>
+      <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <i class="bi bi-envelope-fill text-[var(--accent)]"></i> Contact Us
+      </h3>
       <ul class="text-xs space-y-1 text-gray-400">
         <li><strong>Email:</strong> yun-wangshu@proton.me</li>
-        <li>Response ≤ 24 jam</li>
+        <li><strong>Response:</strong> ≤ 24 jam</li>
+      </ul>
+    </section>
+
+    <section class="mb-6">
+      <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <i class="bi bi-download text-[var(--accent)]"></i> Supported Platforms
+      </h3>
+      <ul class="text-xs space-y-1 text-gray-400">
+        <li>• Instagram (Reels, Posts, Stories)</li>
+        <li>• TikTok (Video, Music)</li>
+        <li>• YouTube (Shorts, Videos)</li>
+        <li>• Twitter/X (Video Posts)</li>
+        <li>• Facebook (Video Posts)</li>
+        <li>• Dan lainnya...</li>
       </ul>
     </section>
 
     <section>
-      <h3 class="font-semibold mb-2 flex items-center gap-2"><i class="bi bi-question-circle-fill text-[var(--accent)]"></i> FAQs</h3>
+      <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <i class="bi bi-question-circle-fill text-[var(--accent)]"></i> FAQs
+      </h3>
       <ul class="text-xs space-y-2 text-gray-400">
-        <li><strong>Apakah aman?</strong><br>Tidak menyimpan data & tanpa redirect.</li>
-        <li><strong>Apakah gratis?</strong><br>100% gratis, tanpa batasan.</li>
-        <li><strong>Format video?</strong><br>MP4, MOV, WEBM langsung unduh.</li>
+        <li>
+          <strong>Apakah aman?</strong><br>
+          Tidak menyimpan data & tanpa redirect. 100% private.
+        </li>
+        <li>
+          <strong>Apakah gratis?</strong><br>
+          100% gratis, tanpa batasan download.
+        </li>
+        <li>
+          <strong>Format video?</strong><br>
+          MP4, MOV, WEBM kualitas terbaik.
+        </li>
+        <li>
+          <strong>Cara penggunaan?</strong><br>
+          Copy link video → Paste → Download.
+        </li>
       </ul>
     </section>
   </aside>
+  
   <div id="sidebarOverlay" class="hidden"></div>
 
-  <!-- Toggle sidebar -->
-  <button id="sidebarToggle" class="fixed top-4 right-4 z-50 bg-[var(--card)] border border-[var(--border)] p-2 rounded-lg">
+  <!-- Sidebar Toggle Button -->
+  <button id="sidebarToggle" class="fixed top-4 right-4 z-50 bg-[var(--card)] border border-[var(--border)] p-2 rounded-lg hover:bg-[var(--border)] transition-colors">
     <i class="bi bi-list text-xl"></i>
   </button>
 
-  <!-- Hero -->
-  <section class="w-full max-w-2xl py-20 text-center mt-10">
-    <h1 class="text-3xl md:text-4xl font-semibold flex items-center justify-center gap-2">
-      <i class="bi bi-lightning-fill text-[var(--accent)]"></i> All In One Downloader
-    </h1>
-    <form id="form" class="mt-8">
-      <label class="text-xs text-gray-500">// Paste HTTPS URL below</label>
-      <input id="url" type="url" placeholder="https://instagram.com/..." required
-        class="w-full mt-2 px-4 py-3 rounded-lg bg-[#010409] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--accent)]" />
-      <button type="submit"
-        class="mt-4 w-full bg-[var(--accent)] text-black font-semibold py-3 rounded-lg hover:opacity-90 transition">
-        Download Video →
-      </button>
-    </form>
+  <!-- Main Content -->
+  <main class="w-full max-w-4xl">
+    <!-- Hero Section -->
+    <section class="w-full py-20 text-center mt-10">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <i class="bi bi-lightning-fill text-3xl text-[var(--accent)] pulse-glow"></i>
+        <h1 class="text-3xl md:text-4xl font-semibold">All In One Downloader</h1>
+      </div>
+      
+      <p class="text-gray-400 text-sm mb-8 max-w-2xl mx-auto">
+        Download video dari berbagai platform sosial media dengan mudah, cepat, dan gratis. 
+        Tidak perlu install aplikasi, bekerja langsung di browser.
+      </p>
 
-    <div id="loading" class="hidden mt-4 text-xs text-gray-400">// Downloading video...</div>
-    <div id="error" class="hidden mt-4 text-xs text-[var(--error)]"></div>
-  </section>
+      <!-- Download Form -->
+      <form id="form" class="mt-8 max-w-2xl mx-auto">
+        <label class="text-xs text-gray-500 block mb-2">
+          <i class="bi bi-link-45deg"></i> Paste URL video di bawah ini
+        </label>
+        <input 
+          id="url" 
+          type="url" 
+          placeholder="https://instagram.com/reel/... atau https://tiktok.com/..." 
+          required
+          class="w-full px-4 py-3 rounded-lg bg-[#010409] border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition-all"
+        />
+        
+        <button 
+          type="submit"
+          id="submitBtn"
+          class="mt-4 w-full bg-[var(--accent)] text-black font-semibold py-3 rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-2"
+        >
+          <i class="bi bi-download"></i>
+          Download Video →
+        </button>
+      </form>
 
-  <!-- Slogan -->
-  <section class="scroll-el w-full max-w-2xl mb-8 text-center">
-    <h2 class="text-xl font-semibold">Mengapa Anda Memilih Website Kami?</h2>
-  </section>
+      <!-- Loading Indicator -->
+      <div id="loading" class="hidden mt-6 p-4 bg-[var(--card)] border border-[var(--border)] rounded-lg">
+        <div class="flex items-center justify-center gap-3 text-sm">
+          <div class="loading-spinner"></div>
+          <span>Memproses video...</span>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">Sedang mengambil data video, harap tunggu sebentar.</p>
+      </div>
 
-  <!-- Keunggulan -->
-  <section class="scroll-el w-full max-w-2xl mb-6">
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
-      <div class="flex items-center gap-3">
-        <i class="bi bi-lightning-fill text-yellow-400 text-xl"></i>
-        <div>
-          <h3 class="font-semibold">Cepat Kilat</h3>
-          <p class="text-xs text-gray-400">Dioptimalkan dengan latensi minimal untuk aplikasi waktu nyata.</p>
+      <!-- Error Message -->
+      <div id="error" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-[var(--error)]"></div>
+
+      <!-- Success Message -->
+      <div id="success" class="hidden mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-[var(--success)]"></div>
+    </section>
+
+    <!-- Supported Platforms -->
+    <section class="scroll-el w-full max-w-2xl mx-auto mb-12">
+      <h2 class="text-xl font-semibold text-center mb-6">Platform yang Didukung</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center platform-icon">
+          <i class="bi bi-instagram text-pink-500 text-2xl mb-2"></i>
+          <p class="text-xs font-semibold">Instagram</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center platform-icon">
+          <i class="bi bi-tiktok text-gray-100 text-2xl mb-2"></i>
+          <p class="text-xs font-semibold">TikTok</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center platform-icon">
+          <i class="bi bi-youtube text-red-500 text-2xl mb-2"></i>
+          <p class="text-xs font-semibold">YouTube</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center platform-icon">
+          <i class="bi bi-twitter text-blue-400 text-2xl mb-2"></i>
+          <p class="text-xs font-semibold">Twitter/X</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center platform-icon">
+          <i class="bi bi-facebook text-blue-500 text-2xl mb-2"></i>
+          <p class="text-xs font-semibold">Facebook</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center platform-icon">
+          <i class="bi bi-three-dots text-gray-400 text-2xl mb-2"></i>
+          <p class="text-xs font-semibold">Lainnya</p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="scroll-el w-full max-w-2xl mb-6">
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
-      <div class="flex items-center gap-3">
-        <i class="bi bi-shield-check text-blue-400 text-xl"></i>
-        <div>
-          <h3 class="font-semibold">Aman & Andal</h3>
-          <p class="text-xs text-gray-400">Keamanan tingkat perusahaan dengan jaminan uptime 99,9%.</p>
+    <!-- Features Section -->
+    <section class="scroll-el w-full max-w-2xl mx-auto mb-8 text-center">
+      <h2 class="text-xl font-semibold">Mengapa Memilih Website Kami?</h2>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="scroll-el w-full max-w-2xl mx-auto mb-6">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm hover:border-[var(--accent)] transition-colors">
+        <div class="flex items-center gap-3">
+          <i class="bi bi-lightning-fill text-yellow-400 text-xl"></i>
+          <div>
+            <h3 class="font-semibold">Cepat Kilat</h3>
+            <p class="text-xs text-gray-400">Proses download dioptimalkan dengan kecepatan maksimal. Tidak perlu menunggu lama.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="scroll-el w-full max-w-2xl mb-20">
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm">
-      <div class="flex items-center gap-3">
-        <i class="bi bi-clock text-purple-400 text-xl"></i>
-        <div>
-          <h3 class="font-semibold">Dukungan 24/7</h3>
-          <p class="text-xs text-gray-400">Dukungan 24 jam untuk semua kebutuhan integrasi Anda.</p>
+    <section class="scroll-el w-full max-w-2xl mx-auto mb-6">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm hover:border-[var(--accent)] transition-colors">
+        <div class="flex items-center gap-3">
+          <i class="bi bi-shield-check text-blue-400 text-xl"></i>
+          <div>
+            <h3 class="font-semibold">Aman & Private</h3>
+            <p class="text-xs text-gray-400">Tidak menyimpan data pribadi atau history download Anda. 100% aman dan terjamin.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <footer class="text-center text-xs text-gray-500 pb-10">
-    <a href="/tos.html" class="underline">Terms</a> •
-    <a href="/privacy.html" class="underline">Privacy</a>
+    <section class="scroll-el w-full max-w-2xl mx-auto mb-6">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm hover:border-[var(--accent)] transition-colors">
+        <div class="flex items-center gap-3">
+          <i class="bi bi-laptop text-purple-400 text-xl"></i>
+          <div>
+            <h3 class="font-semibold">No Installation</h3>
+            <p class="text-xs text-gray-400">Tidak perlu install aplikasi. Bekerja langsung di browser desktop dan mobile.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scroll-el w-full max-w-2xl mx-auto mb-20">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-sm hover:border-[var(--accent)] transition-colors">
+        <div class="flex items-center gap-3">
+          <i class="bi bi-infinity text-green-400 text-xl"></i>
+          <div>
+            <h3 class="font-semibold">Unlimited Free</h3>
+            <p class="text-xs text-gray-400">Download sebanyak yang Anda mau, tanpa batasan dan benar-benar gratis selamanya.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs text-gray-500 pb-10 mt-auto">
+    <div class="flex items-center justify-center gap-4 mb-4">
+      <a href="/tos.html" class="underline hover:text-[var(--accent)] transition-colors">Terms of Service</a>
+      <span>•</span>
+      <a href="/privacy.html" class="underline hover:text-[var(--accent)] transition-colors">Privacy Policy</a>
+    </div>
+    <p>&copy; 2024 All In One Downloader. All rights reserved.</p>
   </footer>
 
   <script>
+    // DOM Helper
     const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
 
-    // Sidebar
-    $('#sidebarToggle').onclick = () => { $('#sidebar').classList.add('open'); $('#sidebarOverlay').classList.add('show'); };
-    $('#closeSidebar').onclick = $('#sidebarOverlay').onclick = () => { $('#sidebar').classList.remove('open'); $('#sidebarOverlay').classList.remove('show'); };
+    // Sidebar functionality
+    $('#sidebarToggle').onclick = () => {
+      $('#sidebar').classList.add('open');
+      $('#sidebarOverlay').classList.add('show');
+    };
+    
+    $('#closeSidebar').onclick = $('#sidebarOverlay').onclick = () => {
+      $('#sidebar').classList.remove('open');
+      $('#sidebarOverlay').classList.remove('show');
+    };
 
     // Scroll animation
-    const io = new IntersectionObserver((entries) => entries.forEach(e => e.target.classList.toggle('show', e.isIntersecting)), { threshold: 0.2 });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => e.target.classList.toggle('show', e.isIntersecting));
+    }, { threshold: 0.1 });
+    
     document.querySelectorAll('.scroll-el').forEach(el => io.observe(el));
 
-    // Downloader
+    // Download functionality
     $('#form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      $('#loading').classList.remove('hidden');
+      
+      const submitBtn = $('#submitBtn');
+      const originalText = submitBtn.innerHTML;
+      const urlInput = $('#url');
+      const url = urlInput.value.trim();
+      
+      // Reset messages
+      $('#loading').classList.add('hidden');
       $('#error').classList.add('hidden');
-
-      const url = $('#url').value.trim();
+      $('#success').classList.add('hidden');
+      
+      // Validate URL
+      if (!url) {
+        showError('Please enter a URL');
+        return;
+      }
+      
+      if (!url.startsWith('https://')) {
+        showError('Please enter a valid HTTPS URL');
+        return;
+      }
+      
+      // Show loading
+      $('#loading').classList.remove('hidden');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+      
       try {
-        const res = await fetch('/api', {
+        const response = await fetch('/api', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({ url })
         });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || 'Server error');
-
-        // Langsung download
-        const a = document.createElement('a');
-        a.href = json.downloadUrl;
-        a.download = json.filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } catch (err) {
-        $('#error').textContent = err.message;
-        $('#error').classList.remove('hidden');
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || `Server error: ${response.status}`);
+        }
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Download failed');
+        }
+        
+        // Show success message
+        showSuccess('Video berhasil diproses! Memulai download...');
+        
+        // Create download link
+        const downloadLink = document.createElement('a');
+        downloadLink.href = data.downloadUrl;
+        downloadLink.download = data.filename;
+        downloadLink.target = '_blank';
+        
+        // Trigger download
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // Reset form after successful download
+        setTimeout(() => {
+          urlInput.value = '';
+          $('#success').classList.add('hidden');
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Download error:', error);
+        showError(error.message || 'Terjadi kesalahan saat memproses video');
       } finally {
         $('#loading').classList.add('hidden');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
       }
+    });
+    
+    // Helper functions
+    function showError(message) {
+      const errorEl = $('#error');
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        errorEl.classList.add('hidden');
+      }, 5000);
+    }
+    
+    function showSuccess(message) {
+      const successEl = $('#success');
+      successEl.textContent = message;
+      successEl.classList.remove('hidden');
+    }
+    
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add pulse animation to submit button on hover
+      $('#submitBtn').addEventListener('mouseenter', function() {
+        this.classList.add('pulse-glow');
+      });
+      
+      $('#submitBtn').addEventListener('mouseleave', function() {
+        this.classList.remove('pulse-glow');
+      });
+      
+      // Add input validation styling
+      $('#url').addEventListener('input', function() {
+        if (this.value.startsWith('https://')) {
+          this.classList.add('border-green-500/50');
+          this.classList.remove('border-red-500/50');
+        } else if (this.value.length > 0) {
+          this.classList.add('border-red-500/50');
+          this.classList.remove('border-green-500/50');
+        } else {
+          this.classList.remove('border-green-500/50', 'border-red-500/50');
+        }
+      });
     });
   </script>
 </body>
