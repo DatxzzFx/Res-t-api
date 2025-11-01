@@ -1,11 +1,7 @@
 {
-  "name": "aio-downloader",
+  "name": "unkpg-no-redirect",
   "version": "1.0.0",
-  "description": "All-in-one social media downloader",
   "main": "api/index.js",
-  "scripts": {
-    "dev": "node api/index.js"
-  },
   "dependencies": {
     "axios": "^1.7.2",
     "express": "^4.21.0"
