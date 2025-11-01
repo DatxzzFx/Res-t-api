@@ -1,9 +1,9 @@
 {
-  "name": "unkpg-no-redirect",
-  "version": "1.0.0",
-  "main": "api/index.js",
-  "dependencies": {
-    "axios": "^1.7.2",
-    "express": "^4.21.0"
-  }
+  "functions": {
+    "api/index.js": { "runtime": "nodejs18.x" }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
 }
